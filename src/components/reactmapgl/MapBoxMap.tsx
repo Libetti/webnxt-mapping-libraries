@@ -3,7 +3,6 @@ import React, { FunctionComponent } from 'react';
 import Map from "react-map-gl"
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-
 type MapProps = {
 	baseLayer: string,
 	isFullscreen: boolean,
@@ -14,7 +13,7 @@ type MapProps = {
 const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer, isFullscreen }) => {
 	return <>
 		<Map
-			mapboxAccessToken={"pk.eyJ1IjoibGliZXR0aSIsImEiOiJjbGNpaG1uNTA1ZXJxM3hxbXhlb3M5YzduIn0.tTx3sPlJ5Vg2T7Mn___fOw"}
+			mapboxAccessToken={process.env.MAPBOX_TOKEN}
 			initialViewState={{
 				longitude: -122.4,
 				latitude: 37.8,
