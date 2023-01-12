@@ -5,12 +5,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 type MapProps = {
 	baseLayer: string,
-	isFullscreen: boolean,
-
-
 }
 
-const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer, isFullscreen }) => {
+const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 	return <>
 		<Map
 			mapboxAccessToken={process.env.MAPBOX_TOKEN}
@@ -18,7 +15,8 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer, isFullscreen }) => 
 				longitude: -122.4,
 				latitude: 37.8,
 				zoom: 4
-			  }}
+			}}
+			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 			projection="globe"
 		/>

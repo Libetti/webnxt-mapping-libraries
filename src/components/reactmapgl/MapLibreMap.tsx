@@ -15,12 +15,11 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 type MapProps = {
 	baseLayer: string,
-	isFullscreen: boolean,
 
 
 }
 
-const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer, isFullscreen }) => {
+const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 	return <>
 		<Map
 			mapLib={maplibregl}
@@ -29,6 +28,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer, isFullscreen }) =
 				latitude: 37.8,
 				zoom: 4
 			  }}
+			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 			projection="globe"
 		/>
