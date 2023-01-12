@@ -9,11 +9,10 @@ const frameworks = ["React-Map-GL (Libre)","React-Map-GL (Mapbox)","React-Leafle
 
 const HomePage: FunctionComponent<{}> = () => {
 	const [tab,setTab] = useState<number>(0)
-	let component = <MapLibreMap baseLayer="Topographic" isFullscreen={false} />
-	console.log(process.env)
+	let component = <MapLibreMap baseLayer="Topographic"/>
 	switch (tab) {
 		case 1:
-			component = <MapBoxMap baseLayer="Topographic" isFullscreen={false} />
+			component = <MapBoxMap baseLayer="Topographic"/>
 			break;
 		case 2:
 			// component = <ReactLeafletMap baseLayer="Topographic" isFullscreen={false} />
