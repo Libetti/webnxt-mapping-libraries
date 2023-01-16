@@ -30,7 +30,6 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 			  }}
 			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-			projection="globe"
 		/>
 	</>
 }
