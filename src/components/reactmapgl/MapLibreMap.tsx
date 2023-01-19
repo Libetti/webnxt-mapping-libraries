@@ -1,25 +1,27 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { FunctionComponent } from 'react';
-import maplibregl from 'maplibre-gl';
-import Map from "react-map-gl"
+import React, {useState, FunctionComponent } from 'react';
+import maplibregl, { Event } from 'maplibre-gl';
+import Map, {Marker} from "react-map-gl"
 import 'maplibre-gl/dist/maplibre-gl.css';
-
-
-// Do we couple the container logic into the map itself and just pass props to change the style?
-// Alt -  the container is created in the component that consumes the map.
-// Right now we'll wrap it in a div to apply styling globally
-
-// Do we want to use a version with mapbox, do we have a license through collins that has enough seats
-// Ideally we can use the base map libre package, federate all the different features of our flight pages out and then
-// plug them in as we need them. I.E weather, planes, airports, fuel estimation,
+import MarkerSet from '../../../USAirports.json';
 
 type MapProps = {
 	baseLayer: string,
-
-
 }
 
 const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
+	
+	const renderMarkers = () => Object.keys(MarkerSet).map((ident)=>(
+		<Marker onClick={(e) => handleMarkerClick(e,MarkerSet[ident])} longitude={MarkerSet[ident].longitude_deg} latitude={MarkerSet[ident].latitude_deg} key={ident}><img src="airport.png" width="16px" height="16px"></img> </Marker>
+	))
+	
+	const handleMarkerClick = (e,airport) => {
+		const { originalEvent:{x, y} } = e
+		setSelectedAirport({...airport, coords:{x,y}})
+	}
+	const [selectedAirport,setSelectedAirport] = useState(null)
+	console.log(selectedAirport)
+
 	return <>
 		<Map
 			mapLib={maplibregl}
@@ -30,7 +32,12 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 			  }}
 			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-		/>
+		>			
+		{renderMarkers()}
+		{selectedAirport && (
+			<div style={{width:"50px", height:'50px', backgroundColor:'grey',opacity:'.67', left: selectedAirport.coords.x, top: selectedAirport.coords.y}}></div>
+		)}
+		</Map>
 	</>
 }
 
