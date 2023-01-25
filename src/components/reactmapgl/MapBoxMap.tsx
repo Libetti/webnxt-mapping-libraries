@@ -1,32 +1,77 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { FunctionComponent } from 'react';
-import Map, {Marker} from "react-map-gl"
-import 'maplibre-gl/dist/maplibre-gl.css';
-import MarkerSet from '../../../USAirports.json';
+import React, {useState, useMemo, FunctionComponent, useRef} from 'react';
+import Map, {Popup, Layer, Source} from "react-map-gl"
+// import 'mapbox-gl/dist/mapbox-gl.css';
+import {airportLayerProps, airportGeoJson} from '../../utils/utils'
+import * as mapsgl from '@aerisweather/mapsgl';
+import '@aerisweather/mapsgl/dist/mapsgl.css';
 
 
 type MapProps = {
 	baseLayer: string,
 }
 
-const renderMarkers = () => Object.keys(MarkerSet).map((ident)=>(
-	<Marker longitude={MarkerSet[ident].longitude_deg} latitude={MarkerSet[ident].latitude_deg}><img src="airport.png" width="16px" height="16px"></img> </Marker>
-))
-
 const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
+
+
+	// const weatherLayer:any = {
+	// 	id: 'WeatherLayer',
+	// 	type: 'raster',
+	// 	  paint: {
+	// 	  'raster-opacity': 0.5
+	// 	},
+	// 	'background-opacity': 0.9,
+	// 	minzoom: 0,
+	// 	maxzoom: 22,
+	//   };
+
+	const [selectedAirport,setSelectedAirport] = useState(null)
+	const mapRef = useRef<any>()
+	const onMapLoad = () => {
+		mapRef.current.loadImage(
+			"/airport.png",
+			(error, image) => {
+				if (error) throw error;
+				 
+				// Add the image to the map style.
+				mapRef.current.addImage('airportImage', image);
+				 
+			}
+		)
+		// const account = new mapsgl.Account('ket', 'secret');
+		// const controller = new mapsgl.MapboxMapController(mapRef.current, { account });
+		// controller.on('load', () => {
+		// 	// do stuff, like add weather layers
+		// 	controller.addWeatherLayer('accum-precip-1hr');
+		// });
+	}
+	const renderMarkers = useMemo<any>(() => airportGeoJson(),[])	
+	
+	const onMapClick = (e) => {
+		console.log(e)
+	}
 	return <>
 		<Map
-			mapboxAccessToken={process.env.MAPBOX_TOKEN}
 			initialViewState={{
-				longitude: -122.4,
-				latitude: 37.8,
-				zoom: 4
-			}}
+			longitude: -122.4,
+			latitude: 37.8,
+			zoom: 4
+		  }}
 			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+			interactiveLayerIds={['AirportMarkers']}
+			onLoad={onMapLoad}
+			onClick={onMapClick}
+			ref={mapRef}
+			mapboxAccessToken={process.env.MAPBOX_TOKEN}
 			projection="globe"
 		>
-			{renderMarkers()}
+			{selectedAirport && (
+			<Popup longitude={selectedAirport.longitude_deg} latitude={selectedAirport.latitude_deg} ><table><thead><th>Name</th></thead><tbody><td>{selectedAirport.name}</td></tbody></table></Popup>
+		)}
+		<Source id="AirportMarkers" type="geojson" data={renderMarkers}>
+          <Layer {...airportLayerProps()} />
+        </Source>
 		</Map>
 	</>
 }

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aerisweather/mapsgl": "^1.1.0",
     "@types/react-map-gl": "^6.1.3",
     "leaflet": "^1.9.3",
     "mapbox-gl": "^2.12.0",
