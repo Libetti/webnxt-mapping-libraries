@@ -1,0 +1,1 @@
+This folder is intended to represent library code. This wouldn't necessarily be repo-specific, but might be arranged in standalone npm packages that we'd import as needed.
