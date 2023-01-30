@@ -100,7 +100,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Name</th>w
+                                    <th>Name</th>
                                 </tr>
                             </thead>
                             <tbody>
