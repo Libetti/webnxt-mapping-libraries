@@ -51,7 +51,6 @@ export class TracksClient {
             .then((response) => response.json())
             .then((data) => {
                 that.tracks = data.flights;
-                console.log(that.tracks);
             });
         setInterval(() => {
             fetch(this.url)

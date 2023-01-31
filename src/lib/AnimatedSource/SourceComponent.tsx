@@ -1,6 +1,7 @@
-import { FunctionComponent, PropsWithChildren, useEffect, useState } from 'react';
+import { FunctionComponent, PropsWithChildren, useEffect, useState, useContext } from 'react';
 import { Source } from 'react-map-gl';
 import { TracksClient } from './TracksClient';
+import { ClockContext } from './ClockComponent';
 
 type AnimationProps = {
     // 'features' could be a list of feature types to add for this source: plane, track, trail, route, etc
@@ -10,14 +11,10 @@ type AnimationProps = {
 
 export const AnimatedSource: FunctionComponent<PropsWithChildren<AnimationProps>> = ({ children, tracksClient }) => {
     const [pointData, setPointData] = useState(null);
+    const clock = useContext(ClockContext);
 	useEffect(() => {
 		const animation = window.requestAnimationFrame(() => {
-            // how might we handle replay? do we want to replicate the "animation clock" from legacy maps?
-            // for that matter, should we use a server time reference instead of depending on the client?
-            const clockOffset = 120;
-            const timestamp = new Date().getTime() / 1000 - clockOffset;
-
-            const positions = tracksClient.getPositionsAt(timestamp);
+            const positions = tracksClient.getPositionsAt(clock.getTimestamp());
             let geoJson = {
                 type: 'GeometryCollection',
                 geometries: positions.map((position) => {
