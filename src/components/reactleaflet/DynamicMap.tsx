@@ -1,11 +1,9 @@
 // Install map libre and create a base map, gzip and minify the project
 import React, { FunctionComponent, useRef, useEffect} from 'react';
 import { MapContainer, TileLayer} from 'react-leaflet'
-import { Icon, GeoJSON,} from 'leaflet'
+import { Icon, GeoJSON, Marker} from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { airportGeoJson } from "../../utils/utils";
-
-
 
 const DynamicMap: FunctionComponent<{}> = () => {
 	const mapRef = useRef()
@@ -17,11 +15,10 @@ const DynamicMap: FunctionComponent<{}> = () => {
 			popupAnchor: [0, -15],
 		})
 		
-		
 		const airportsGeojson = new GeoJSON(airportGeoJson(), {
 			pointToLayer: (feature, latlng) => {
 			let label = String(feature.properties.name)
-			  return L.marker(latlng, {
+			  return new Marker(latlng, {
 				icon: AirportIcon,
 				title:"hello I am a title"
 			  }).bindTooltip(label, {permanent:true, opacity: .7, direction:'bottom', className:"custom_tooltip", offset:[0,10]}).openTooltip();

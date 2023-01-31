@@ -1,10 +1,8 @@
 // Install map libre and create a base map, gzip and minify the project
 import React, {useState, useMemo, FunctionComponent, useRef} from 'react';
-import Map, {Popup, Layer, Source} from "react-map-gl"
+import Map, {Popup, Layer, Source,MapLayerMouseEvent, MapRef} from "react-map-gl"
 // import 'mapbox-gl/dist/mapbox-gl.css';
 import {airportLayerProps, airportGeoJson} from '../../utils/utils'
-import * as mapsgl from '@aerisweather/mapsgl';
-import '@aerisweather/mapsgl/dist/mapsgl.css';
 
 
 type MapProps = {
@@ -24,32 +22,41 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 	// 	minzoom: 0,
 	// 	maxzoom: 22,
 	//   };
+    const [selectedAirport, setSelectedAirport] = useState<{
+        longitude: number;
+        latitude: number;
+        name: string;
+        type: string;
+    } | null>(null);
 
-	const [selectedAirport,setSelectedAirport] = useState(null)
-	const mapRef = useRef<any>()
-	const onMapLoad = () => {
-		mapRef.current.loadImage(
-			"/airport.png",
-			(error, image) => {
-				if (error) throw error;
-				 
-				// Add the image to the map style.
-				mapRef.current.addImage('airportImage', image);
-				 
-			}
-		)
-		// const account = new mapsgl.Account('ket', 'secret');
-		// const controller = new mapsgl.MapboxMapController(mapRef.current, { account });
-		// controller.on('load', () => {
-		// 	// do stuff, like add weather layers
-		// 	controller.addWeatherLayer('accum-precip-1hr');
-		// });
-	}
+	const mapRef = useRef<MapRef>()
+    const onMapLoad = () => {
+        mapRef.current.loadImage("/airport.png", (error, image) => {
+            if (error) throw error;
+
+            // Add the image to the map style.
+            mapRef.current.addImage("airportImage", image);
+        });
+    };
 	const renderMarkers = useMemo<any>(() => airportGeoJson(),[])	
 	
-	const onMapClick = (e) => {
-		console.log(e)
-	}
+    const onMapClick = (event: MapLayerMouseEvent) => {
+        const selectedFeatures = mapRef.current.queryRenderedFeatures(
+            event.point,
+            {
+                layers: ["airport-markers"],
+            }
+        );
+        if (selectedFeatures.length) {
+            setSelectedAirport({
+                longitude: event.lngLat.lng,
+                latitude: event.lngLat.lat,
+                name: selectedFeatures[0].properties.name,
+                type: selectedFeatures[0].properties.name,
+            });
+        }
+    };
+
 	return <>
 		<Map
 			initialViewState={{
@@ -59,17 +66,34 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 		  }}
 			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-			interactiveLayerIds={['AirportMarkers']}
+			interactiveLayerIds={['airport-markers']}
 			onLoad={onMapLoad}
 			onClick={onMapClick}
 			ref={mapRef}
 			mapboxAccessToken={process.env.MAPBOX_TOKEN}
 			projection="globe"
 		>
-			{selectedAirport && (
-			<Popup longitude={selectedAirport.longitude_deg} latitude={selectedAirport.latitude_deg} ><table><thead><th>Name</th></thead><tbody><td>{selectedAirport.name}</td></tbody></table></Popup>
-		)}
-		<Source id="AirportMarkers" type="geojson" data={renderMarkers}>
+                {selectedAirport && (
+                    <Popup
+                        longitude={selectedAirport.longitude}
+                        latitude={selectedAirport.latitude}
+                        onClose={() => setSelectedAirport(null)}
+                    >
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{selectedAirport.name}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </Popup>
+                )}
+		<Source id="AirportSource" type="geojson" data={renderMarkers}>
           <Layer {...airportLayerProps()} />
         </Source>
 		</Map>

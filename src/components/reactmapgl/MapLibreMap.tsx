@@ -39,23 +39,6 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         });
     };
 
-    const weatherSourceProps: any = {
-        id: "OpenWeatherSource",
-        type: "raster",
-        tiles: [
-            `https://maps.openweathermap.org/maps/2.0/radar/6/13/23?&appid=${process.env.OPENWEATHER_KEY}&tm=1600781400`,
-        ],
-        tileSize: 256,
-    };
-
-    const weatherLayerProps: any = {
-        id: "OpenWeatherSource",
-        type: "raster",
-        source: "OpenWeatherSource",
-        minzoom: 4,
-        maxzoom: 10,
-    };
-
     const renderMarkers = useMemo<any>(() => airportGeoJson(), []);
 
     const onMapClick = (event: MapLayerMouseEvent) => {

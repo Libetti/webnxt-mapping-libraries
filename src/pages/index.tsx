@@ -1,12 +1,10 @@
 import React, {FunctionComponent, useState} from "react"
-import dynamic from "next/dynamic";
 import MapLibreMap from "../components/reactmapgl/MapLibreMap"
 import MapBoxMap from "../components/reactmapgl/MapBoxMap"
 import ReactLeafletMap from "../components/reactleaflet/ReactLeafletMap"
 import Header from "../components/layout/Header"
 import Content from "../components/layout/Content"
 import Footer from "../components/layout/Footer"
-import 'leaflet/dist/leaflet.css'
 
 
 const frameworks = ["React-Map-GL (Libre)","React-Map-GL (Mapbox)","React-Leaflet"]
