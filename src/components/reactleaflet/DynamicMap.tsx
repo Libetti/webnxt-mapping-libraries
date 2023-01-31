@@ -9,24 +9,22 @@ import { airportGeoJson } from "../../utils/utils";
 
 const DynamicMap: FunctionComponent<{}> = () => {
 	const mapRef = useRef()
+	const onMapReady:any = ({target}) => {
 
-	useEffect(() => {
-		if(!mapRef.current){
-			return
-		}
 		const AirportIcon = new Icon({
 			iconUrl: "/airport.png",
-			iconSize: [26, 26],
+			iconSize: [22, 22],
 			popupAnchor: [0, -15],
-			shadowAnchor: [13, 28]
 		})
-	
-		const parksGeojson = new GeoJSON(airportGeoJson(), {
+		
+		
+		const airportsGeojson = new GeoJSON(airportGeoJson(), {
 			pointToLayer: (feature, latlng) => {
 			let label = String(feature.properties.name)
 			  return L.marker(latlng, {
-				icon: AirportIcon
-			  }).bindTooltip(label, {permanent:true, opacity: .7}).openTooltip();
+				icon: AirportIcon,
+				title:"hello I am a title"
+			  }).bindTooltip(label, {permanent:true, opacity: .7, direction:'bottom', className:"custom_tooltip", offset:[0,10]}).openTooltip();
 			},
 			onEachFeature: (feature, layer) => {
 			  if ( !feature && !feature.properties.name ) return;
@@ -44,12 +42,12 @@ const DynamicMap: FunctionComponent<{}> = () => {
 		  </table>`);
 			}
 		  });
-		  parksGeojson.addTo(mapRef.current);
-	}, [])
+		  airportsGeojson.addTo(target);
+	}
 	
 
 	return (
-		<MapContainer ref={mapRef} center={[37.8, -122.4]} zoom={5} scrollWheelZoom={false} style={{width: '100vw', height: '100vh'}}
+		<MapContainer whenReady={onMapReady} ref={mapRef} center={[37.8, -122.4]} zoom={5} scrollWheelZoom={false} style={{width: '100vw', height: '100vh'}}
 		>
 			<TileLayer
        			attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

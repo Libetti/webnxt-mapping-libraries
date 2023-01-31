@@ -42,6 +42,16 @@ body {
 
 }
 
+.leaflet-tooltip.custom_tooltip{
+	background: none;
+	border: none;
+	border-bottom: none;
+	box-shadow: none;
+	font-weight: bold;
+}
+.leaflet-tooltip.leaflet-tooltip-bottom.custom_tooltip::before{
+	border: none;
+}
 #footer{
 	grid-area: footer;
 }
