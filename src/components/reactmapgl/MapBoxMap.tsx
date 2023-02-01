@@ -11,18 +11,6 @@ type MapProps = {
 }
 
 const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
-
-
-	// const weatherLayer:any = {
-	// 	id: 'WeatherLayer',
-	// 	type: 'raster',
-	// 	  paint: {
-	// 	  'raster-opacity': 0.5
-	// 	},
-	// 	'background-opacity': 0.9,
-	// 	minzoom: 0,
-	// 	maxzoom: 22,
-	//   };
     const [selectedAirport, setSelectedAirport] = useState<{
         longitude: number;
         latitude: number;
