@@ -11,7 +11,7 @@ import Map, {
     Layer,
     Source,
     MapLayerMouseEvent,
-    MapRef,
+    Marker
 } from "react-map-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { airportLayerProps, airportGeoJson } from "../../utils/utils";
@@ -47,7 +47,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 	}
 
 
-    const mapRef = useRef<MapRef>();
+    const mapRef = useRef<any>();
 
     const onMapLoad = ({target:map}) => {
 
@@ -78,6 +78,25 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
             });
         }
     };
+
+    const generateAirportLineString = (e) => {
+        console.log(e)
+        // if(mapRef.current){
+        //     mapRef.current.addLayer({
+        //         'id': 'route',
+        //         'type': 'line',
+        //         'source': 'route',
+        //         'layout': {
+        //         'line-join': 'round',
+        //         'line-cap': 'round'
+        //         },
+        //         'paint': {
+        //         'line-color': '#888',
+        //         'line-width': 8
+        //         }
+        //     });
+        // }
+    }
 
     return (
         <>
@@ -121,7 +140,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                 <Source key="AirportSource" type="geojson" data={renderMarkers}>
                     <Layer {...airportLayerProps()} />
                 </Source>
-
+                <Marker onClick={generateAirportLineString} longitude={-83.90} latitude={34.27} scale={40}><img style={{width:"26px",height:"34px"}} src="/airplane.svg"></img></Marker>
             </Map>
         </>
     );
