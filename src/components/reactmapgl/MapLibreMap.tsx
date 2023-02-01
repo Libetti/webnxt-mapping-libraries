@@ -28,14 +28,35 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         type: string;
     } | null>(null);
 
+	const AerisLayer:any = {			
+		id: 'aerisweather-layers',
+		type: 'raster',
+		source: 'aerisweather-layers',
+		minzoom: 0,
+		maxzoom: 8
+	}
+
+	const AerisSource:any = {	
+		id:"aerisweather-layer",
+		type: 'raster',
+		tiles: [
+			`https://maps1.aerisapi.com/${process.env['AERIS_ID']}_${process.env['AERIS_SECRET']}/radar-global/{z}/{x}/{y}/20160601174100.png`,
+		],
+		tileSize: 256,
+		attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>'
+	}
+
+
     const mapRef = useRef<MapRef>();
 
-    const onMapLoad = () => {
-        mapRef.current.loadImage("/airport.png", (error, image) => {
+    const onMapLoad = ({target:map}) => {
+
+		
+        map.loadImage("/airport.png", (error, image) => {
             if (error) throw error;
 
             // Add the image to the map style.
-            mapRef.current.addImage("airportImage", image);
+            map.addImage("airportImage", image);
         });
     };
 
@@ -94,12 +115,13 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         </table>
                     </Popup>
                 )}
+				<Source key="AerisSource" {...AerisSource}>
+                    <Layer {...AerisLayer} />
+                </Source>
                 <Source key="AirportSource" type="geojson" data={renderMarkers}>
                     <Layer {...airportLayerProps()} />
                 </Source>
-                {/* <Source key="WeatherSource" {...weatherSourceProps}>
-                    <Layer {...weatherLayerProps} />
-                </Source> */}
+
             </Map>
         </>
     );

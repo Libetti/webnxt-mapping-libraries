@@ -1,4 +1,5 @@
 // Install map libre and create a base map, gzip and minify the project
+import { map } from 'leaflet';
 import React, {useState, useMemo, FunctionComponent, useRef} from 'react';
 import Map, {Popup, Layer, Source,MapLayerMouseEvent, MapRef} from "react-map-gl"
 // import 'mapbox-gl/dist/mapbox-gl.css';
@@ -29,15 +30,34 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         type: string;
     } | null>(null);
 
+	const AerisLayer:any = {			
+		id: 'aerisweather-layers',
+		type: 'raster',
+		source: 'aerisweather-layers',
+		minzoom: 0,
+		maxzoom: 8
+	}
+
+	const AerisSource:any = {	
+		id:"aerisweather-layer",
+		type: 'raster',
+		tiles: [
+			`https://maps1.aerisapi.com/${process.env['AERIS_ID']}_${process.env['AERIS_SECRET']}/radar-global/{z}/{x}/{y}/20160601174100.png`,
+		],
+		tileSize: 256,
+		attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>'
+	}
+
 	const mapRef = useRef<MapRef>()
-    const onMapLoad = () => {
-        mapRef.current.loadImage("/airport.png", (error, image) => {
+    const onMapLoad = ({target:map}) => {
+        map.loadImage("/airport.png", (error, image) => {
             if (error) throw error;
 
             // Add the image to the map style.
-            mapRef.current.addImage("airportImage", image);
+            map.addImage("airportImage", image);
         });
     };
+
 	const renderMarkers = useMemo<any>(() => airportGeoJson(),[])	
 	
     const onMapClick = (event: MapLayerMouseEvent) => {
@@ -93,6 +113,9 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         </table>
                     </Popup>
                 )}
+								<Source key="AerisSource" {...AerisSource}>
+                    <Layer {...AerisLayer} />
+                </Source>
 		<Source id="AirportSource" type="geojson" data={renderMarkers}>
           <Layer {...airportLayerProps()} />
         </Source>
