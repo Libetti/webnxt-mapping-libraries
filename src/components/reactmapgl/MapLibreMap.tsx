@@ -1,20 +1,19 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, {
-    useState,
-    useMemo,
-    FunctionComponent,
-    useRef,
-} from "react";
+import React, { useState, useMemo, FunctionComponent, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import Map, {
     Popup,
     Layer,
     Source,
     MapLayerMouseEvent,
-    Marker
+    Marker,
 } from "react-map-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { airportLayerProps, airportGeoJson } from "../../utils/utils";
+import {
+    airportLayerProps,
+    airportGeoJson,
+    generateLineString,
+} from "../../utils/utils";
 
 type MapProps = {
     baseLayer: string;
@@ -28,30 +27,27 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         type: string;
     } | null>(null);
 
-	const AerisLayer:any = {			
-		id: 'aerisweather-layers',
-		type: 'raster',
-		source: 'aerisweather-layers',
-		minzoom: 0,
-		maxzoom: 8
-	}
+    const AerisLayer: any = {
+        id: "aerisweather-layers",
+        type: "raster",
+        source: "aerisweather-layers",
+        minzoom: 0,
+        maxzoom: 8,
+    };
 
-	const AerisSource:any = {	
-		id:"aerisweather-layer",
-		type: 'raster',
-		tiles: [
-			`https://maps1.aerisapi.com/${process.env['AERIS_ID']}_${process.env['AERIS_SECRET']}/radar-global/{z}/{x}/{y}/20160601174100.png`,
-		],
-		tileSize: 256,
-		attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>'
-	}
-
+    const AerisSource: any = {
+        id: "aerisweather-layer",
+        type: "raster",
+        tiles: [
+            `https://maps1.aerisapi.com/${process.env["AERIS_ID"]}_${process.env["AERIS_SECRET"]}/radar-global/{z}/{x}/{y}/20160601174100.png`,
+        ],
+        tileSize: 256,
+        attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>',
+    };
 
     const mapRef = useRef<any>();
 
-    const onMapLoad = ({target:map}) => {
-
-		
+    const onMapLoad = ({ target: map }) => {
         map.loadImage("/airport.png", (error, image) => {
             if (error) throw error;
 
@@ -80,23 +76,35 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
     };
 
     const generateAirportLineString = (e) => {
-        console.log(e)
-        // if(mapRef.current){
-        //     mapRef.current.addLayer({
-        //         'id': 'route',
-        //         'type': 'line',
-        //         'source': 'route',
-        //         'layout': {
-        //         'line-join': 'round',
-        //         'line-cap': 'round'
-        //         },
-        //         'paint': {
-        //         'line-color': '#888',
-        //         'line-width': 8
-        //         }
-        //     });
-        // }
-    }
+        if (mapRef.current) {
+            const map = mapRef.current.getMap()
+            const planeRouteSource = map.getSource("planeRoute")
+
+            const geoJson = generateLineString(
+                [e.target._lngLat.lng, e.target._lngLat.lat],
+                [-122.14625730869646, 37.58590328083136],
+                0
+            )
+            if(planeRouteSource){
+                map.removeSource("planeRoute")
+                map.removeLayer("planeLayer")
+            }
+            map.addSource("planeRoute",geoJson);
+            map.addLayer({
+                id: "planeLayer",
+                type: "line",
+                source: "planeRoute",
+                layout: {
+                    "line-join": "round",
+                    "line-cap": "round",
+                },
+                paint: {
+                    "line-color": "#11ee11",
+                    "line-width": 3,
+                },
+            });
+        }
+    };
 
     return (
         <>
@@ -134,13 +142,23 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         </table>
                     </Popup>
                 )}
-				<Source key="AerisSource" {...AerisSource}>
+                <Source key="AerisSource" {...AerisSource}>
                     <Layer {...AerisLayer} />
                 </Source>
                 <Source key="AirportSource" type="geojson" data={renderMarkers}>
                     <Layer {...airportLayerProps()} />
                 </Source>
-                <Marker onClick={generateAirportLineString} longitude={-83.90} latitude={34.27} scale={40}><img style={{width:"26px",height:"34px"}} src="/airplane.svg"></img></Marker>
+                <Marker
+                    onClick={generateAirportLineString}
+                    longitude={-83.9}
+                    latitude={34.27}
+                    scale={40}
+                >
+                    <img
+                        style={{ width: "26px", height: "34px" }}
+                        src="/airplane.svg"
+                    ></img>
+                </Marker>
             </Map>
         </>
     );
