@@ -1,9 +1,8 @@
 // Install map libre and create a base map, gzip and minify the project
-import { map } from 'leaflet';
 import React, {useState, useMemo, FunctionComponent, useRef} from 'react';
-import Map, {Popup, Layer, Source,MapLayerMouseEvent, MapRef} from "react-map-gl"
+import Map, {Popup, Layer, Source,MapLayerMouseEvent, MapRef, Marker} from "react-map-gl"
 // import 'mapbox-gl/dist/mapbox-gl.css';
-import {airportLayerProps, airportGeoJson} from '../../utils/utils'
+import {airportLayerProps, airportGeoJson, generateLineString} from '../../utils/utils'
 
 
 type MapProps = {
@@ -35,6 +34,37 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 		tileSize: 256,
 		attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>'
 	}
+
+	const generateAirportLineString = (e) => {
+        if (mapRef.current) {
+            const map = mapRef.current.getMap()
+            const planeRouteSource = map.getSource("planeRoute")
+
+            const geoJson = generateLineString(
+                [e.target._lngLat.lng, e.target._lngLat.lat],
+                [-122.14625730869646, 37.58590328083136],
+                0
+            )
+            if(planeRouteSource){
+                map.removeSource("planeRoute")
+                map.removeLayer("planeLayer")
+            }
+            map.addSource("planeRoute",geoJson);
+            map.addLayer({
+                id: "planeLayer",
+                type: "line",
+                source: "planeRoute",
+                layout: {
+                    "line-join": "round",
+                    "line-cap": "round",
+                },
+                paint: {
+                    "line-color": "#11ee11",
+                    "line-width": 3,
+                },
+            });
+        }
+    };
 
 	const mapRef = useRef<MapRef>()
     const onMapLoad = ({target:map}) => {
@@ -107,6 +137,17 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 		<Source id="AirportSource" type="geojson" data={renderMarkers}>
           <Layer {...airportLayerProps()} />
         </Source>
+		<Marker
+                    onClick={generateAirportLineString}
+                    longitude={-83.9}
+                    latitude={34.27}
+                    scale={40}
+                >
+                    <img
+                        style={{ width: "26px", height: "34px" }}
+                        src="/airplane.svg"
+                    ></img>
+                </Marker>
 		</Map>
 	</>
 }
