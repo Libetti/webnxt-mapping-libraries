@@ -1,5 +1,5 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useRef, useMemo } from "react";
 import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import { Icon, GeoJSON, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -58,6 +58,18 @@ const DynamicMap: FunctionComponent<{}> = () => {
         airportsGeojson.addTo(target);
     };
 
+	const reversePos = useMemo(()=>{
+		const pos = generateLineString(
+			[-83.9, 34.27],
+			[-122.14625730869646, 37.58590328083136],
+			0
+		).data.geometry.coordinates
+		const reversedCoords = []
+		for (var i = 0; i < pos.length; i++) {
+			reversedCoords.push([pos[i][1], pos[i][0]]);
+		  }
+		return reversedCoords
+	},[])
     return (
         <MapContainer
             whenReady={onMapReady}
@@ -77,13 +89,7 @@ const DynamicMap: FunctionComponent<{}> = () => {
             />
             <Polyline
                 pathOptions={{ color: "lime" }}
-                positions={
-                    generateLineString(
-                        [-83.9, 34.27],
-                        [-122.14625730869646, 37.58590328083136],
-                        0
-                    ).data.geometry.coordinates
-                }
+                positions={reversePos}
             />
         </MapContainer>
     );
