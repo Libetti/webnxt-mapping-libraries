@@ -74,6 +74,25 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
             // Add the image to the map style.
             map.addImage("airportImage", image);
         });
+		const geoJson = generateLineString(
+            [-83.9, 34.27],
+            [-122.14625730869646, 37.58590328083136],
+            0
+        );
+        map.addSource("planeRoute", geoJson);
+        map.addLayer({
+            id: "planeLayer",
+            type: "line",
+            source: "planeRoute",
+            layout: {
+                "line-join": "round",
+                "line-cap": "round",
+            },
+            paint: {
+                "line-color": "#11ee11",
+                "line-width": 3,
+            },
+        });
     };
 
 	const renderMarkers = useMemo<any>(() => airportGeoJson(),[])	

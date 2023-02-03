@@ -54,6 +54,25 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
             // Add the image to the map style.
             map.addImage("airportImage", image);
         });
+        const geoJson = generateLineString(
+            [-83.9, 34.27],
+            [-122.14625730869646, 37.58590328083136],
+            0
+        );
+        map.addSource("planeRoute", geoJson);
+        map.addLayer({
+            id: "planeLayer",
+            type: "line",
+            source: "planeRoute",
+            layout: {
+                "line-join": "round",
+                "line-cap": "round",
+            },
+            paint: {
+                "line-color": "#11ee11",
+                "line-width": 3,
+            },
+        });
     };
 
     const renderMarkers = useMemo<any>(() => airportGeoJson(), []);
@@ -77,19 +96,23 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 
     const generateAirportLineString = (e) => {
         if (mapRef.current) {
-            const map = mapRef.current.getMap()
-            const planeRouteSource = map.getSource("planeRoute")
+            const map = mapRef.current.getMap();
+            const airports = mapRef.current.queryRenderedFeatures({ layers: ["airport-markers"] })
+            const rando = Math.random() * (airports.length - 0) + 0;
+
+
+            const planeRouteSource = map.getSource("planeRoute");
 
             const geoJson = generateLineString(
                 [e.target._lngLat.lng, e.target._lngLat.lat],
                 [-122.14625730869646, 37.58590328083136],
                 0
-            )
-            if(planeRouteSource){
-                map.removeSource("planeRoute")
-                map.removeLayer("planeLayer")
+            );
+            if (planeRouteSource) {
+                map.removeLayer("planeLayer");
+                map.removeSource("planeRoute");
             }
-            map.addSource("planeRoute",geoJson);
+            map.addSource("planeRoute", geoJson);
             map.addLayer({
                 id: "planeLayer",
                 type: "line",
@@ -142,10 +165,15 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         </table>
                     </Popup>
                 )}
-                <Source key="AerisSource" {...AerisSource}>
+                <Source key="aeris-source" {...AerisSource}>
                     <Layer {...AerisLayer} />
                 </Source>
-                <Source key="AirportSource" type="geojson" data={renderMarkers}>
+                <Source
+                    id="airport-source"
+                    key="airport-source"
+                    type="geojson"
+                    data={renderMarkers}
+                >
                     <Layer {...airportLayerProps()} />
                 </Source>
                 <Marker
