@@ -1,7 +1,7 @@
 // Install map libre and create a base map, gzip and minify the project
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import maplibregl from 'maplibre-gl';
-import Map, { LayerProps, Layer } from "react-map-gl"
+import Map, { LayerProps, Layer, Marker } from "react-map-gl"
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { TracksClient, AnimationClock, AnimatedSource } from '../../lib/AnimatedSource';
 
@@ -20,15 +20,40 @@ type MapProps = {
 
 }
 
+const onMapLoad = ({ target: map }) => {
+	// Load the airliner PNG
+	// Note: this is just the existing airliner SVG from fa_web, exported as a monochrome PNG
+	map.loadImage('/airliner.png', (error, image) => {
+		if (error) throw error;
+
+		// Add the image to the map style. Specify SDF so we can color it later on.
+		map.addImage('airliner', image, { sdf: true });
+	});
+};
+
 // Define the layer that'll contain animated stuff
-const pointLayer: LayerProps = {
-	id: 'point',
-	type: 'circle',
+const planeLayer: LayerProps = {
+	id: 'planes',
+	type: 'symbol',
+	layout: {
+		'icon-allow-overlap': true,
+		'icon-image': 'airliner',
+		'icon-rotate': ['get', 'heading'],
+		'text-variable-anchor': [
+			'top-left',
+			'top-right',
+			'bottom-right',
+			'bottom-left'
+		],
+		'text-field': ['get', 'ident'],
+		'text-radial-offset': 1,
+		// this means the icon will show even if we can't figure out how to deconflict its text label
+		'text-optional': true
+	},
 	paint: {
-		'circle-radius': 3,
-		'circle-color': '#00FF00',
-		'circle-stroke-width': 1,
-		'circle-stroke-color': '#008900'
+		'icon-color': '#00FF00',
+		'icon-halo-color': '#008900',
+		'icon-halo-width': 5
 	}
 };
 
@@ -46,6 +71,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 			  }}
 			style={{width: '100vw', height: '100vh'}}
 			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+			onLoad={onMapLoad}
 		>
 			<AnimationClock
 				rate={60}
@@ -56,7 +82,7 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 					features={['plane']}
 					tracksClient={airportClient}
 				>
-					<Layer {...pointLayer} />
+					<Layer {...planeLayer} />
 				</AnimatedSource>
 			</AnimationClock>
 		</Map>

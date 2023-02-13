@@ -16,15 +16,21 @@ export const AnimatedSource: FunctionComponent<PropsWithChildren<AnimationProps>
 		const animation = window.requestAnimationFrame(() => {
             const positions = tracksClient.getPositionsAt(clock.getTimestamp());
             let geoJson = {
-                type: 'GeometryCollection',
-                geometries: positions.map((position) => {
+                type: 'FeatureCollection',
+                features: positions.map((position) => {
                     return {
-                        type: 'Point',
-                        coordinates: position.coordinates
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: position.coordinates
+                        },
+                        properties: {
+                            heading: position.heading,
+                            ident: position.ident
+                        }
                     };
-                })
+                }),
             };
-            console.log(geoJson.geometries.length);
 
             setPointData(geoJson);
 		});

@@ -8,7 +8,7 @@
  * the tracks data. In reality, we'd likely be subscribing to GraphQL updates and
  * doing piecewise updates of that tracks data instead.
  */
- type ConstantSegmentFn = {
+type ConstantSegmentFn = {
     type: 'constant',
     c: number
 };
@@ -28,10 +28,16 @@ type Segment = {
     validTo: number
 };
 type Track = {
+    ident: string,
     landingTimes: {
         scheduled: null | number,
         estimated: null | number,
         actual: null | number
+    },
+    takeoffTimes: {
+        scheduled: null | number,
+        estimated: null | number,
+        actual: null | number 
     },
     track2: Segment[]
 };
@@ -84,7 +90,9 @@ export class TracksClient {
             const lon = matchedSegment.lonFn.m * timestamp + matchedSegment.lonFn.b;
             const lat = matchedSegment.latFn.m * timestamp + matchedSegment.latFn.b;
             positions.push({
-                coordinates: [lon, lat]
+                coordinates: [lon, lat],
+                heading: matchedSegment.headingFn.c,
+                ident: this.tracks[flight_id].ident
             });
         }
 
