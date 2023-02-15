@@ -31,7 +31,7 @@ const onMapLoad = ({ target: map }) => {
 	});
 };
 
-// Define the layer that'll contain animated stuff
+// Define the layers that'll contain animated stuff
 const planeLayer: LayerProps = {
 	id: 'planes',
 	type: 'symbol',
@@ -57,6 +57,16 @@ const planeLayer: LayerProps = {
 	}
 };
 
+const trailLayer: LayerProps = {
+	id: 'tracks',
+	type: 'line',
+	layout: {},
+	paint: {
+		'line-color': '#00FF00',
+		'line-width': 1
+	}
+};
+
 // Create the track client instance for the animated source
 let airportClient = new TracksClient('-originOrDestination KIAH');
 
@@ -78,8 +88,14 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 				offset={3600}
 			>
 				<AnimatedSource
-					// the feature prop doesn't actually do anything right now, it's just illustrative
-					features={['plane']}
+					feature={'trail'}
+					tracksClient={airportClient}
+				>
+					<Layer {...trailLayer} />
+				</AnimatedSource>
+				
+				<AnimatedSource
+					feature={'plane'}
 					tracksClient={airportClient}
 				>
 					<Layer {...planeLayer} />
