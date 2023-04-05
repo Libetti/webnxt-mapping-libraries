@@ -58,3 +58,21 @@ export function generateLineString(
         data: feature,
     };
 }
+
+export function createRandomPlanes(num: number): any {
+    return Array.from({ length: num }, (i) => {
+        i;
+    }).map(() => {
+        const coords = [
+            (Math.random() * (180 - -180) + -180).toFixed(3),
+            (Math.random() * (180 - -180) + -180).toFixed(3),
+        ];
+        return {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: coords,
+            },
+        };
+    });
+}

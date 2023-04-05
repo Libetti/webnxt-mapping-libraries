@@ -1,15 +1,27 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, {useState, useMemo, FunctionComponent, useRef} from 'react';
-import Map, {Popup, Layer, Source,MapLayerMouseEvent, MapRef, Marker} from "react-map-gl"
+import React, { useState, useMemo, FunctionComponent, useRef } from "react";
+import Map, {
+    Popup,
+    Layer,
+    Source,
+    MapLayerMouseEvent,
+    MapRef,
+    Marker,
+} from "react-map-gl";
 // import 'mapbox-gl/dist/mapbox-gl.css';
-import {airportLayerProps, airportGeoJson, generateLineString} from '../../utils/utils'
-
+import {
+    airportLayerProps,
+    airportGeoJson,
+    generateLineString,
+    createRandomPlanes,
+} from "../../utils/utils";
 
 type MapProps = {
-	baseLayer: string,
-}
+    baseLayer: string;
+};
 
 const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
+    const [planeFeatures, setPlaneFeatures] = useState(createRandomPlanes(10000));
     const [selectedAirport, setSelectedAirport] = useState<{
         longitude: number;
         latitude: number;
@@ -17,39 +29,58 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         type: string;
     } | null>(null);
 
-	const AerisLayer:any = {			
-		id: 'aerisweather-layers',
-		type: 'raster',
-		source: 'aerisweather-layers',
-		minzoom: 0,
-		maxzoom: 8
-	}
+    const AerisLayer: any = {
+        id: "aerisweather-layers",
+        type: "raster",
+        source: "aerisweather-layers",
+        minzoom: 0,
+        maxzoom: 8,
+    };
 
-	const AerisSource:any = {	
-		id:"aerisweather-layer",
-		type: 'raster',
-		tiles: [
-			`https://maps1.aerisapi.com/${process.env['AERIS_ID']}_${process.env['AERIS_SECRET']}/radar-global/{z}/{x}/{y}/20160601174100.png`,
-		],
-		tileSize: 256,
-		attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>'
-	}
+    const AerisSource: any = {
+        id: "aerisweather-layer",
+        type: "raster",
+        tiles: [
+            `https://maps1.aerisapi.com/${process.env["AERIS_ID"]}_${process.env["AERIS_SECRET"]}/radar-global/{z}/{x}/{y}/20160601174100.png`,
+        ],
+        tileSize: 256,
+        attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>',
+    };
 
-	const generateAirportLineString = (e) => {
+    const planeCollection = {
+        type: "FeatureCollection",
+        features: planeFeatures,
+    };
+    const planeSource: any = {
+        id: "planeMarkerSource",
+        type: "geojson",
+        data: planeCollection,
+    };
+
+    const planeLayer: any = {
+        id: "airplaneMarkerLayer",
+        type: "symbol",
+        layout: {
+            "icon-image": "airplaneImage",
+            "icon-size": 1.8,
+        },
+    };
+
+    const generateAirportLineString = (e) => {
         if (mapRef.current) {
-            const map = mapRef.current.getMap()
-            const planeRouteSource = map.getSource("planeRoute")
+            const map = mapRef.current.getMap();
+            const planeRouteSource = map.getSource("planeRoute");
 
             const geoJson = generateLineString(
                 [e.target._lngLat.lng, e.target._lngLat.lat],
                 [-122.14625730869646, 37.58590328083136],
                 0
-            )
-            if(planeRouteSource){
-                map.removeSource("planeRoute")
-                map.removeLayer("planeLayer")
+            );
+            if (planeRouteSource) {
+                map.removeSource("planeRoute");
+                map.removeLayer("planeLayer");
             }
-            map.addSource("planeRoute",geoJson);
+            map.addSource("planeRoute", geoJson);
             map.addLayer({
                 id: "planeLayer",
                 type: "line",
@@ -66,15 +97,21 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         }
     };
 
-	const mapRef = useRef<MapRef>()
-    const onMapLoad = ({target:map}) => {
+    const mapRef = useRef<MapRef>();
+    const onMapLoad = ({ target: map }) => {
         map.loadImage("/airport.png", (error, image) => {
             if (error) throw error;
 
             // Add the image to the map style.
             map.addImage("airportImage", image);
         });
-		const geoJson = generateLineString(
+        map.loadImage("/airplane.png", (error, image) => {
+            if (error) throw error;
+
+            // Add the image to the map style.
+            map.addImage("airplaneImage", image, { sdf: true });
+        });
+        const geoJson = generateLineString(
             [-83.9, 34.27],
             [-122.14625730869646, 37.58590328083136],
             0
@@ -95,8 +132,8 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         });
     };
 
-	const renderMarkers = useMemo<any>(() => airportGeoJson(),[])	
-	
+    const renderMarkers = useMemo<any>(() => airportGeoJson(), []);
+
     const onMapClick = (event: MapLayerMouseEvent) => {
         const selectedFeatures = mapRef.current.queryRenderedFeatures(
             event.point,
@@ -113,23 +150,31 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
             });
         }
     };
-
-	return <>
-		<Map
-			initialViewState={{
-			longitude: -122.4,
-			latitude: 37.8,
-			zoom: 4
-		  }}
-			style={{width: '100vw', height: '100vh'}}
-			mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-			interactiveLayerIds={['airport-markers']}
-			onLoad={onMapLoad}
-			onClick={onMapClick}
-			ref={mapRef}
-			mapboxAccessToken={process.env.MAPBOX_TOKEN}
-			projection="globe"
-		>
+    const addPlanes = (n: number): any =>
+        setPlaneFeatures(createRandomPlanes(n));
+    return (
+        <>
+            <Map
+                initialViewState={{
+                    longitude: -122.4,
+                    latitude: 37.8,
+                    zoom: 4,
+                }}
+                style={{ width: "100vw", height: "100vh" }}
+                mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+                interactiveLayerIds={["airport-markers"]}
+                onLoad={onMapLoad}
+                onClick={onMapClick}
+                ref={mapRef}
+                mapboxAccessToken={process.env.MAPBOX_TOKEN}
+                projection="globe"
+            >
+                <button
+                    style={{ position: "absolute" }}
+                    onClick={() => addPlanes(10000)}
+                >
+                    Click me to add 10000 planes
+                </button>
                 {selectedAirport && (
                     <Popup
                         longitude={selectedAirport.longitude}
@@ -150,25 +195,18 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                         </table>
                     </Popup>
                 )}
-								<Source key="AerisSource" {...AerisSource}>
+                <Source key="AerisSource" {...AerisSource}>
                     <Layer {...AerisLayer} />
                 </Source>
-		<Source id="AirportSource" type="geojson" data={renderMarkers}>
-          <Layer {...airportLayerProps()} />
-        </Source>
-		<Marker
-                    onClick={generateAirportLineString}
-                    longitude={-83.9}
-                    latitude={34.27}
-                    scale={40}
-                >
-                    <img
-                        style={{ width: "26px", height: "34px" }}
-                        src="/airplane.svg"
-                    ></img>
-                </Marker>
-		</Map>
-	</>
-}
+                <Source id="AirportSource" type="geojson" data={renderMarkers}>
+                    <Layer {...airportLayerProps()} />
+                </Source>
+                <Source {...planeSource}>
+                    <Layer {...planeLayer} />
+                </Source>
+            </Map>
+        </>
+    );
+};
 
-export default MapBoxMap
+export default MapBoxMap;

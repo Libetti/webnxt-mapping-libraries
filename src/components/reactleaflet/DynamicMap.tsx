@@ -1,12 +1,29 @@
 // Install map libre and create a base map, gzip and minify the project
 import React, { FunctionComponent, useRef, useMemo } from "react";
 import { MapContainer, TileLayer, Polyline } from "react-leaflet";
-import { Icon, GeoJSON, Marker } from "leaflet";
+import { Icon, GeoJSON, Marker, LayerGroup} from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { airportGeoJson, generateLineString } from "../../utils/utils";
 
 const DynamicMap: FunctionComponent<{}> = () => {
     const mapRef = useRef();
+    const generateMarkers = () => {
+        const AirplaneIcon = new Icon({
+            iconUrl: "/airplane.svg",
+            iconSize: [24, 36],
+        });
+
+        const markers = Array.from({ length: 10000}, (i) => {
+            i;
+        }).map(() => {
+            const coords : any = [
+                (Math.random() * (180 - -180) + -180).toFixed(3),
+                (Math.random() * (180 - -180) + -180).toFixed(3),
+            ];
+            return new Marker(coords, { icon: AirplaneIcon });
+        });
+        return new LayerGroup(markers)
+    };
     const onMapReady: any = ({ target }) => {
         const AirportIcon = new Icon({
             iconUrl: "/airport.png",
@@ -56,20 +73,21 @@ const DynamicMap: FunctionComponent<{}> = () => {
         });
         AirplaneMarker.addTo(target);
         airportsGeojson.addTo(target);
+        target.addLayer(generateMarkers())
     };
 
-	const reversePos = useMemo(()=>{
-		const pos = generateLineString(
-			[-83.9, 34.27],
-			[-122.14625730869646, 37.58590328083136],
-			0
-		).data.geometry.coordinates
-		const reversedCoords = []
-		for (var i = 0; i < pos.length; i++) {
-			reversedCoords.push([pos[i][1], pos[i][0]]);
-		  }
-		return reversedCoords
-	},[])
+    const reversePos = useMemo(() => {
+        const pos = generateLineString(
+            [-83.9, 34.27],
+            [-122.14625730869646, 37.58590328083136],
+            0
+        ).data.geometry.coordinates;
+        const reversedCoords = [];
+        for (var i = 0; i < pos.length; i++) {
+            reversedCoords.push([pos[i][1], pos[i][0]]);
+        }
+        return reversedCoords;
+    }, []);
     return (
         <MapContainer
             whenReady={onMapReady}
@@ -87,10 +105,7 @@ const DynamicMap: FunctionComponent<{}> = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url={`https://maps1.aerisapi.com/${process.env["AERIS_ID"]}_${process.env["AERIS_SECRET"]}/radar-global/{z}/{x}/{y}/20160601174100.png`}
             />
-            <Polyline
-                pathOptions={{ color: "lime" }}
-                positions={reversePos}
-            />
+            <Polyline pathOptions={{ color: "lime" }} positions={reversePos} />
         </MapContainer>
     );
 };

@@ -13,6 +13,7 @@ import {
     airportLayerProps,
     airportGeoJson,
     generateLineString,
+    createRandomPlanes
 } from "../../utils/utils";
 
 type MapProps = {
@@ -20,6 +21,7 @@ type MapProps = {
 };
 
 const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
+    const [planeFeatures, setPlaneFeatures] = useState(createRandomPlanes(10000));
     const [selectedAirport, setSelectedAirport] = useState<{
         longitude: number;
         latitude: number;
@@ -45,6 +47,24 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         attribution: '<a href="https://www.aerisweather.com/">AerisWeather</a>',
     };
 
+    const planeCollection = {
+        type: "FeatureCollection",
+        features: planeFeatures,
+    };
+    const planeSource: any = {
+        id: "planeMarkerSource",
+        type: "geojson",
+        data: planeCollection,
+    };
+
+    const planeLayer: any = {
+        id: "airplaneMarkerLayer",
+        type: "symbol",
+        layout: {
+            "icon-image": "airplaneImage",
+            "icon-size": 1.8,
+        },
+    };
     const mapRef = useRef<any>();
 
     const onMapLoad = ({ target: map }) => {
@@ -53,6 +73,12 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
 
             // Add the image to the map style.
             map.addImage("airportImage", image);
+        });
+        map.loadImage("/airplane.png", (error, image) => {
+            if (error) throw error;
+
+            // Add the image to the map style.
+            map.addImage("airplaneImage", image, { sdf: true });
         });
         const geoJson = generateLineString(
             [-83.9, 34.27],
@@ -128,7 +154,8 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
             });
         }
     };
-
+    const addPlanes = (n: number): any =>
+        setPlaneFeatures(createRandomPlanes(n));
     return (
         <>
             <Map
@@ -145,6 +172,12 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                 onClick={onMapClick}
                 ref={mapRef}
             >
+                <button
+                    style={{ position: "absolute" }}
+                    onClick={() => addPlanes(10000)}
+                >
+                    Click me to add 10000 planes
+                </button>
                 {selectedAirport && (
                     <Popup
                         longitude={selectedAirport.longitude}
@@ -175,6 +208,9 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                     data={renderMarkers}
                 >
                     <Layer {...airportLayerProps()} />
+                </Source>
+                <Source {...planeSource}>
+                    <Layer {...planeLayer} />
                 </Source>
                 <Marker
                     onClick={generateAirportLineString}

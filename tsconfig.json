@@ -23,7 +23,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/utils/utils.tsx"  ],
+, "src/utils/utils.tsx", "src/components/openlayers/OLMap.js"  ],
   "exclude": [
     "node_modules"
   ]

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@aerisweather/mapsgl": "^1.1.0",
+    "@maplibre/maplibre-gl-style-spec": "^18.0.1",
     "@turf/bezier-spline": "^6.5.0",
     "@turf/helpers": "^6.5.0",
     "@turf/line-offset": "^6.5.0",
@@ -11,6 +12,8 @@
     "mapbox-gl": "^2.12.0",
     "maplibre-gl": "^2.4.0",
     "next": "^13.0.6",
+    "ol": "^7.3.0",
+    "ol-mapbox-style": "^10.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.0",
