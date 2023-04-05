@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Profiler } from "react";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
@@ -17,7 +17,7 @@ import { airportGeoJson, generateLineString } from "../../utils/utils";
 
 function OLMap() {
     // set intial state
-
+    let msRender = 0
     const [map, setMap] = useState();
     const [selectedCoord, setSelectedCoord] = useState();
     const [planes, setPlanes] = useState([
@@ -174,9 +174,19 @@ function OLMap() {
         // get clicked coordinate using mapRef to access current React state inside OpenLayers callback
         //  https://stackoverflow.com/a/60643670
     };
+    const handleRender = (id, phase, actualDuration) => {
+        console.log(
+            `The ${id} interaction took ` +
+                `${actualDuration}ms to render (${phase})`
+        );
+        msRender += actualDuration;
+        console.log(msRender, "accumulative");
+        // Would log “The ComposeButton interaction
+        // took 25.2999999970197678ms to render (update)”
+    };
     // render component
     return (
-        
+        <Profiler onRender={handleRender} id="OLMap">
         <div>
             <button onClick={(e) => {}}>Click me to add 10000</button>
             <div
@@ -185,6 +195,7 @@ function OLMap() {
                 style={{ height: "90%", width: "100%", position: "absolute" }}
             ></div>
         </div>
+        </Profiler>
     );
 }
 

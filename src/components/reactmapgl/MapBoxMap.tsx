@@ -1,5 +1,5 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { useState, useMemo, FunctionComponent, useRef } from "react";
+import React, { useState, useMemo, FunctionComponent, useRef, Profiler } from "react";
 import Map, {
     Popup,
     Layer,
@@ -21,6 +21,7 @@ type MapProps = {
 };
 
 const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
+    let msRender = 0
     const [planeFeatures, setPlaneFeatures] = useState(createRandomPlanes(10000));
     const [selectedAirport, setSelectedAirport] = useState<{
         longitude: number;
@@ -152,8 +153,20 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
     };
     const addPlanes = (n: number): any =>
         setPlaneFeatures(createRandomPlanes(n));
+
+        const handleRender = (id: string, phase: string, actualDuration: any) => {
+            console.log(
+                `The ${id} interaction took ` +
+                    `${actualDuration}ms to render (${phase})`
+            );
+            msRender += actualDuration
+            console.log(msRender,'accumulative')
+            // Would log “The ComposeButton interaction
+            // took 25.2999999970197678ms to render (update)”
+        };
     return (
         <>
+        <Profiler id="MapBox" onRender={handleRender}>
             <Map
                 initialViewState={{
                     longitude: -122.4,
@@ -205,6 +218,7 @@ const MapBoxMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                     <Layer {...planeLayer} />
                 </Source>
             </Map>
+            </Profiler>
         </>
     );
 };

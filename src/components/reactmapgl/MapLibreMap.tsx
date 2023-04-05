@@ -1,5 +1,5 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { useState, useMemo, FunctionComponent, useRef } from "react";
+import React, { useState, useMemo, FunctionComponent, useRef, Profiler } from "react";
 import maplibregl from "maplibre-gl";
 import Map, {
     Popup,
@@ -13,7 +13,7 @@ import {
     airportLayerProps,
     airportGeoJson,
     generateLineString,
-    createRandomPlanes
+    createRandomPlanes,
 } from "../../utils/utils";
 
 type MapProps = {
@@ -21,7 +21,10 @@ type MapProps = {
 };
 
 const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
-    const [planeFeatures, setPlaneFeatures] = useState(createRandomPlanes(10000));
+    let msRender = 0
+    const [planeFeatures, setPlaneFeatures] = useState(
+        createRandomPlanes(10000)
+    );
     const [selectedAirport, setSelectedAirport] = useState<{
         longitude: number;
         latitude: number;
@@ -123,9 +126,10 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
     const generateAirportLineString = (e) => {
         if (mapRef.current) {
             const map = mapRef.current.getMap();
-            const airports = mapRef.current.queryRenderedFeatures({ layers: ["airport-markers"] })
+            const airports = mapRef.current.queryRenderedFeatures({
+                layers: ["airport-markers"],
+            });
             const rando = Math.random() * (airports.length - 0) + 0;
-
 
             const planeRouteSource = map.getSource("planeRoute");
 
@@ -155,9 +159,21 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
         }
     };
     const addPlanes = (n: number): any =>
-        setPlaneFeatures(createRandomPlanes(n));
+        setPlaneFeatures(createRandomPlanes(n))
+        
+    const handleRender = (id: string, phase: string, actualDuration: any) => {
+        console.log(
+            `The ${id} interaction took ` +
+                `${actualDuration}ms to render (${phase})`
+        );
+        msRender += actualDuration;
+        console.log(msRender, "accumulative");
+        // Would log “The ComposeButton interaction
+        // took 25.2999999970197678ms to render (update)”
+    };
     return (
         <>
+        <Profiler id="maplibre" onRender={handleRender}>
             <Map
                 mapLib={maplibregl}
                 initialViewState={{
@@ -224,6 +240,8 @@ const MapLibreMap: FunctionComponent<MapProps> = ({ baseLayer }) => {
                     ></img>
                 </Marker>
             </Map>
+            </Profiler>
+
         </>
     );
 };

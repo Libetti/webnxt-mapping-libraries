@@ -1,11 +1,12 @@
 // Install map libre and create a base map, gzip and minify the project
-import React, { FunctionComponent, useRef, useMemo } from "react";
+import React, { FunctionComponent, useRef, useMemo, Profiler } from "react";
 import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import { Icon, GeoJSON, Marker, LayerGroup} from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { airportGeoJson, generateLineString } from "../../utils/utils";
 
 const DynamicMap: FunctionComponent<{}> = () => {
+    let msRender = 0
     const mapRef = useRef();
     const generateMarkers = () => {
         const AirplaneIcon = new Icon({
@@ -88,7 +89,18 @@ const DynamicMap: FunctionComponent<{}> = () => {
         }
         return reversedCoords;
     }, []);
+    const handleRender = (id: string, phase: string, actualDuration: any) => {
+        console.log(
+            `The ${id} interaction took ` +
+                `${actualDuration}ms to render (${phase})`
+        );
+        msRender += actualDuration;
+        console.log(msRender, "accumulative");
+        // Would log “The ComposeButton interaction
+        // took 25.2999999970197678ms to render (update)”
+    };
     return (
+        <Profiler id="react" onRender={handleRender}>
         <MapContainer
             whenReady={onMapReady}
             ref={mapRef}
@@ -107,6 +119,7 @@ const DynamicMap: FunctionComponent<{}> = () => {
             />
             <Polyline pathOptions={{ color: "lime" }} positions={reversePos} />
         </MapContainer>
+        </Profiler>
     );
 };
 

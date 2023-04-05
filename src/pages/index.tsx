@@ -8,7 +8,6 @@ import Content from "../components/layout/Content";
 import Footer from "../components/layout/Footer";
 
 import measureRender from "../utils/measureRender";
-import { stringify } from "querystring";
 
 const frameworks = [
     "React-Map-GL (Libre)",
@@ -41,14 +40,7 @@ const HomePage: FunctionComponent<{}> = () => {
         default:
             break;
     }
-    const handleRender = (id: string, phase: string, actualDuration: any) => {
-        console.log(
-            `The ${id} interaction took ` +
-                `${actualDuration}ms to render (${phase})`
-        );
-        // Would log “The ComposeButton interaction
-        // took 25.2999999970197678ms to render (update)”
-    };
+
     return (
         <div id="root">
                 <Header frameworks={frameworks} setTab={setTab} />
